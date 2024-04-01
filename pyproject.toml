@@ -1,0 +1,24 @@
+[project]
+name = "dagster-io-managers"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Braden Kinard", email = "bkinard9@gmail.com" }
+]
+dependencies = ["boto3", "dagster", "datasets", "polars", "s3fs"]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dagster_io_managers"]
