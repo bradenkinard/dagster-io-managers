@@ -49,7 +49,7 @@ class PolarsIOManager(ConfigurableIOManager):
                 {
                     "row_count": row_count,
                     "path": path,
-                    "example_rows": MetadataValue.md(obj.head()),
+                    "example_rows": MetadataValue.md(str(obj.head())),
                 }
             )
 
