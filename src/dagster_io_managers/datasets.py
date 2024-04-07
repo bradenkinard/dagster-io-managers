@@ -74,7 +74,7 @@ class LocalDatasetIOManager(DatasetIOManager):
 class S3DatasetIOManager(DatasetIOManager):
     """IOManager for Huggingface dataset in S3."""
 
-    s3_bucket: str
+    bucket: str
 
     aws_access_key: str = EnvVar("AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = EnvVar("AWS_SECRET_ACCESS_KEY")
