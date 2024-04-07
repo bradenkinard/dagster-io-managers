@@ -10,6 +10,7 @@ import s3fs
 from dagster import (
     ConfigurableIOManager,
     InputContext,
+    MetadataValue,
     OutputContext,
 )
 from dagster._seven.temp_dir import get_system_temp_directory
@@ -42,7 +43,15 @@ class PolarsIOManager(ConfigurableIOManager):
             msg = f"Outputs of type {type(obj)} not supported."
             raise TypeError(msg)
 
-        context.add_output_metadata({"row_count": row_count, "path": path})
+        with pl.Config() as cfg:
+            cfg.set_tbl_formatting("ASCII_MARKDOWN")
+            context.add_output_metadata(
+                {
+                    "row_count": row_count,
+                    "path": path,
+                    "example_rows": MetadataValue.md(obj.head()),
+                }
+            )
 
     def load_input(
         self: Self,
