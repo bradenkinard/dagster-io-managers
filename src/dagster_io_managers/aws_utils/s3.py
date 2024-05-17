@@ -13,6 +13,17 @@ def get_filepath(bucket_name: str, key: str) -> str:
     return get_bucketpath(bucket_name) + "/" + key
 
 
+def get_key_from_filepath(filepath: str) -> str:
+    """Return the key from an S3 filepath."""
+    keylist = filepath.replace("s3://", "").split("/")[1:]
+    return "/".join(keylist)
+
+
+def get_bucket_from_filepath(filepath: str) -> str:
+    """Return the bucket from an S3 filepath."""
+    return filepath.replace("s3://", "").split("/")[0]
+
+
 def create_bucket(bucket_name: str, region: str | None = None) -> None:
     """Create the S3 bucket if it doesn't exist."""
     s3 = boto3.client("s3")
@@ -27,3 +38,15 @@ def create_bucket(bucket_name: str, region: str | None = None) -> None:
                 Bucket=bucket_name,
                 CreateBucketConfiguration=location,
             )
+
+
+def write_to_s3(bucket_name: str, key: str, body: str) -> None:
+    """Write a string to an S3 bucket."""
+    s3 = boto3.resource("s3")
+    s3.Object(bucket_name, key).put(Body=body)
+
+
+def read_from_s3(bucket_name: str, key: str, encoding: str = "utf-8") -> str:
+    """Read a string from an S3 bucket."""
+    s3 = boto3.client("s3")
+    return s3.get_object(Bucket=bucket_name, Key=key)["Body"].read().decode(encoding)

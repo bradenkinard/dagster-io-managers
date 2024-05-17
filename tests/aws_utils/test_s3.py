@@ -46,3 +46,46 @@ def test_filepath():
     expected_path = f"s3://{bucket_name}/{key}"
 
     assert s3.get_filepath(bucket_name=bucket_name, key=key) == expected_path
+
+
+def test_key_from_filepath():
+    """Test the key_from_filepath method."""
+    key = "some/key"
+    filepath = "s3://my-test-bucket/" + key
+
+    assert s3.get_key_from_filepath(filepath) == key
+
+
+def test_bucket_from_filepath():
+    """Test the bucket_from_filepath method."""
+    bucket_name = "my-test-bucket"
+    filepath = "s3://" + bucket_name + "/some/key"
+
+    assert s3.get_bucket_from_filepath(filepath) == bucket_name
+
+
+@mock_aws
+def test_write_to_s3(aws_credentials):
+    """Test the write_to_s3 method."""
+    bucket_name = "my-test-bucket"
+    key = "my-text-file.txt"
+    body = "Hello, world!"
+    s3_client = boto3.client("s3")
+    s3.create_bucket(bucket_name=bucket_name)
+
+    s3.write_to_s3(bucket_name=bucket_name, key=key, body=body)
+    response = s3_client.get_object(Bucket=bucket_name, Key=key)
+    assert response["Body"].read().decode("utf-8") == body
+
+
+@mock_aws
+def test_read_from_s3(aws_credentials):
+    """Test the read_from_s3 method."""
+    bucket_name = "my-test-bucket"
+    key = "my-text-file.txt"
+    body = "Hello, world!"
+    s3_client = boto3.client("s3")
+    s3.create_bucket(bucket_name=bucket_name)
+    s3_client.put_object(Bucket=bucket_name, Key=key, Body=body)
+
+    assert s3.read_from_s3(bucket_name=bucket_name, key=key) == body
