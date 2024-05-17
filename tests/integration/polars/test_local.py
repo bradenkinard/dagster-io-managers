@@ -13,4 +13,4 @@ def test_localpolarsiomanager_write_dataframe(temp_directory, polars_df):
 
     io_manager._write_dataframe(polars_df, path)  # noqa: SLF001
 
-    Path(path).exists()
+    assert Path(path).exists()

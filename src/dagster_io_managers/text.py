@@ -56,8 +56,8 @@ class TextFileIOManager(ConfigurableIOManager):
         context: InputContext | OutputContext,
     ) -> str:
         key = f"{context.asset_key.path[-1]}.{self.filetype}"
-        if self.base_path:
-            return f"{self.base_path}/{key}"
+        if self._base_path:
+            return f"{self._base_path}/{key}"
         return key
 
     def get_output_path(self: Self, path: str) -> str:
@@ -76,6 +76,9 @@ class LocalTextFileIOManager(TextFileIOManager):
 
     def write_to_file(self: Self, text: str, path: str) -> None:
         """Write a string to a file."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         with Path.open(path, "w") as f:
             f.write(text)
 
@@ -96,7 +99,8 @@ class S3TextFileIOManager(TextFileIOManager):
 
     def write_to_file(self: Self, text: str, path: str) -> None:
         """Write a string as a text file to an S3 bucket."""
-        s3.write_to_s3(self.bucket_name, path, text)
+        s3.create_bucket(bucket_name=self.bucket_name)
+        s3.write_to_s3(bucket_name=self.bucket_name, key=path, body=text)
 
     def read_from_file(self: Self, path: str) -> str:
         """Read a file as a string from an S3 bucket."""

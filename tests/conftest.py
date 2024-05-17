@@ -27,3 +27,9 @@ def temp_directory():
 def polars_df():
     """Create a simple polars dataframe."""
     return pl.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+
+
+@pytest.fixture()
+def text_string():
+    """Create a simple text string."""
+    return "Hello, world!"
