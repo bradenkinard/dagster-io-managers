@@ -31,7 +31,7 @@ def test_create_bucket_with_region(aws_credentials):
     assert response["LocationConstraint"] == region
 
 
-def test_basepath(aws_credentials):
+def test_basepath():
     """Test the basepath property."""
     bucket_name = "my-test-bucket"
     expected_path = f"s3://{bucket_name}"
@@ -39,7 +39,7 @@ def test_basepath(aws_credentials):
     assert s3.get_bucketpath(bucket_name=bucket_name) == expected_path
 
 
-def test_filepath(aws_credentials):
+def test_filepath():
     """Test the filepath method."""
     bucket_name = "my-test-bucket"
     key = "some/key"
