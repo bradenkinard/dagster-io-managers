@@ -15,6 +15,8 @@ from dagster import (
 )
 from dagster._seven.temp_dir import get_system_temp_directory
 
+from .aws_utils import s3
+
 
 class PolarsIOManager(ConfigurableIOManager):
     """IOManager will take in a polars dataframe and store it as parquet.
@@ -50,7 +52,7 @@ class PolarsIOManager(ConfigurableIOManager):
                     "row_count": row_count,
                     "path": path,
                     "example_rows": MetadataValue.md(str(obj.head())),
-                }
+                },
             )
 
     def load_input(
@@ -85,14 +87,14 @@ class LocalPolarsIOManager(PolarsIOManager):
 class S3PolarsIOManager(PolarsIOManager):
     """IOManager for S3 polars dataframe storage."""
 
-    bucket: str
-    base_path: str = ""
+    bucket_name: str
 
     @property
     def _base_path(self: Self) -> str:
-        return "s3://" + self.bucket
+        return s3.get_bucketpath(self.bucket_name)
 
     def _write_dataframe(self: Self, df: pl.DataFrame, path: str) -> None:
+        s3.create_bucket(bucket_name=self.bucket_name)
         fs = s3fs.S3FileSystem()
         with fs.open(path, mode="wb") as f:
             df.write_parquet(f)
