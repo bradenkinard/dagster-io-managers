@@ -5,13 +5,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Self
 
-import boto3
 from dagster import (
     ConfigurableIOManager,
     InputContext,
     OutputContext,
 )
 from dagster._seven.temp_dir import get_system_temp_directory
+
+from .aws_utils import s3
 
 
 class TextFileIOManager(ConfigurableIOManager):
@@ -67,7 +68,11 @@ class TextFileIOManager(ConfigurableIOManager):
 class LocalTextFileIOManager(TextFileIOManager):
     """IOManager for local text file storage."""
 
-    base_path: str = get_system_temp_directory()
+    directory: str = get_system_temp_directory()
+
+    @property
+    def _base_path(self: Self) -> str:
+        return self.directory
 
     def write_to_file(self: Self, text: str, path: str) -> None:
         """Write a string to a file."""
@@ -83,21 +88,20 @@ class LocalTextFileIOManager(TextFileIOManager):
 class S3TextFileIOManager(TextFileIOManager):
     """IOManager for S3 text file storage."""
 
-    bucket: str
-    base_path: str = ""
+    bucket_name: str
+
+    @property
+    def _base_path(self: Self) -> str:
+        return ""
 
     def write_to_file(self: Self, text: str, path: str) -> None:
         """Write a string as a text file to an S3 bucket."""
-        s3 = boto3.resource("s3").Bucket(self.bucket)
-        s3.Object(path).put(Body=text)
+        s3.write_to_s3(self.bucket_name, path, text)
 
     def read_from_file(self: Self, path: str) -> str:
         """Read a file as a string from an S3 bucket."""
-        s3 = boto3.client("s3")
-        return (
-            s3.get_object(Bucket=self.bucket, Key=path)["Body"].read().decode("utf-8")
-        )
+        return s3.read_from_s3(self.bucket_name, path)
 
     def get_output_path(self: Self, path: str) -> str:
         """Return the path to the output file."""
-        return f"s3://{self.bucket}/{path}"
+        return s3.get_filepath(self.bucket_name, path)
