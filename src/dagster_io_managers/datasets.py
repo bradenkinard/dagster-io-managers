@@ -14,6 +14,8 @@ from dagster import (
 from dagster._seven.temp_dir import get_system_temp_directory
 from datasets import DatasetDict, load_from_disk
 
+from .aws_utils import s3
+
 
 class DatasetIOManager(ConfigurableIOManager):
     """IOManager for a huggingface dataset."""
@@ -22,15 +24,17 @@ class DatasetIOManager(ConfigurableIOManager):
     def _base_path(self: Self) -> None:
         raise NotImplementedError
 
+    def _create_path(self: Self) -> None:
+        raise NotImplementedError
+
     def handle_output(
         self: Self,
         context: OutputContext,
         obj: DatasetDict,
     ) -> None:
         """Serialize a dataset object to disk."""
+        self._create_directory()
         path = self._get_path(context)
-        if "://" not in self._base_path:
-            Path(path).parent.mkdir(parents=True, exist_ok=True)
 
         if isinstance(obj, DatasetDict):
             obj.save_to_disk(path, storage_options=self._storage_options)
@@ -58,23 +62,30 @@ class DatasetIOManager(ConfigurableIOManager):
     ) -> str:
         key = context.asset_key.path[-1]
 
-        return f"{self._base_path}/{key}/{key}.pq"
+        return f"{self._base_path}/{key}"
 
 
 class LocalDatasetIOManager(DatasetIOManager):
     """IOManager for local Huggingface dataset."""
 
-    base_path: str = get_system_temp_directory()
+    directory: str = get_system_temp_directory()
+
+    @property
+    def _base_path(self: Self) -> str:
+        return self.directory
 
     @property
     def _storage_options(self: Self) -> dict:
         return {}
 
+    def _create_path(self: Self) -> None:
+        Path(self._base_path).mkdir(parents=True, exist_ok=True)
+
 
 class S3DatasetIOManager(DatasetIOManager):
     """IOManager for Huggingface dataset in S3."""
 
-    bucket: str
+    bucket_name: str
 
     aws_access_key: str = EnvVar("AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = EnvVar("AWS_SECRET_ACCESS_KEY")
@@ -82,7 +93,10 @@ class S3DatasetIOManager(DatasetIOManager):
 
     @property
     def _base_path(self: Self) -> str:
-        return "s3://" + self.s3_bucket
+        return s3.get_bucketpath(self.bucket_name)
+
+    def _create_path(self: Self) -> None:
+        s3.create_bucket(bucket_name=self.bucket_name)
 
     @property
     def _storage_options(self: Self) -> dict:
