@@ -1,4 +1,4 @@
-"""Integration tests for the local polars io manager module."""
+"""Integration tests for the local polars io manager class."""
 
 from pathlib import Path
 

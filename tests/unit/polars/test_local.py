@@ -1,4 +1,4 @@
-"""Unit tests for the local polars io manager module."""
+"""Unit tests for the local polars io manager class."""
 
 from dagster_io_managers.polars import LocalPolarsIOManager
 

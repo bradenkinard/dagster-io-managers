@@ -1,4 +1,4 @@
-"""Unit tests for the local text file io manager module."""
+"""Unit tests for the local text file io manager class."""
 
 from dagster_io_managers.text import LocalTextFileIOManager
 

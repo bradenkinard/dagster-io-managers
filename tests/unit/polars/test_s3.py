@@ -1,4 +1,4 @@
-"""Unit tests for the s3 Polars io manager module."""
+"""Unit tests for the s3 Polars io manager class."""
 
 from dagster_io_managers.polars import S3PolarsIOManager
 

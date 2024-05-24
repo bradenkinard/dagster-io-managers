@@ -1,4 +1,4 @@
-"""Integration tests for the local textfile io manager module."""
+"""Integration tests for the local textfile io manager class."""
 
 from pathlib import Path
 

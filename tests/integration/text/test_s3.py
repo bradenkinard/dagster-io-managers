@@ -1,4 +1,4 @@
-"""Integration tests for the s3 textfile io manager module."""
+"""Integration tests for the s3 textfile io manager class."""
 
 import boto3
 from dagster_io_managers.text import S3TextFileIOManager
