@@ -1,4 +1,4 @@
-"""Unit tests for the aws-utils s3 module."""
+"""Unit tests for the aws-utils module."""
 
 from dagster_io_managers.aws_utils import s3
 

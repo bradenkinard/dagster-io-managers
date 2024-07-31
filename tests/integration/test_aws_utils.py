@@ -1,4 +1,4 @@
-"""Integration tests for the aws-utils s3 module."""
+"""Integration tests for the aws-utils module."""
 
 import boto3
 from dagster_io_managers.aws_utils import s3
@@ -36,11 +36,12 @@ def test_write_to_s3(aws_credentials):
     """Test the write_to_s3 method."""
     bucket_name = "my-test-bucket"
     key = "my-text-file.txt"
+    path = f"s3://{bucket_name}/{key}"
     body = "Hello, world!"
     s3_client = boto3.client("s3")
     s3.create_bucket(bucket_name=bucket_name)
 
-    s3.write_to_s3(bucket_name=bucket_name, key=key, body=body)
+    s3.write_to_s3(body=body, path=path)
     response = s3_client.get_object(Bucket=bucket_name, Key=key)
     assert response["Body"].read().decode("utf-8") == body
 
@@ -50,9 +51,10 @@ def test_read_from_s3(aws_credentials):
     """Test the read_from_s3 method."""
     bucket_name = "my-test-bucket"
     key = "my-text-file.txt"
+    path = f"s3://{bucket_name}/{key}"
     body = "Hello, world!"
     s3_client = boto3.client("s3")
     s3.create_bucket(bucket_name=bucket_name)
     s3_client.put_object(Bucket=bucket_name, Key=key, Body=body)
 
-    assert s3.read_from_s3(bucket_name=bucket_name, key=key) == body
+    assert s3.read_from_s3(path) == body

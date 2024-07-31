@@ -2,20 +2,23 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from pathlib import Path
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
-from dagster import (
-    ConfigurableIOManager,
-    InputContext,
-    OutputContext,
-)
 from dagster._seven.temp_dir import get_system_temp_directory
 
 from .aws_utils import s3
+from .base import BaseIOManager
+
+if TYPE_CHECKING:
+    from dagster import (
+        InputContext,
+        OutputContext,
+    )
 
 
-class TextFileIOManager(ConfigurableIOManager):
+class TextFileIOManager(BaseIOManager, ABC):
     """IOManager will take in a text string and store it as a text file.
 
     Downstream ops can load this file as a string.
@@ -23,46 +26,27 @@ class TextFileIOManager(ConfigurableIOManager):
 
     filetype: str = "txt"
 
-    @property
-    def _base_path(self: Self) -> None:
-        raise NotImplementedError
-
     def handle_output(
         self: Self,
         context: OutputContext,
-        obj: str,
+        asset: str,
     ) -> None:
-        """Write string text to a file asset."""
-        path = self._get_path(context)
-
-        if isinstance(obj, str):
-            self.write_to_file(text=obj, path=path)
-        else:
-            msg = f"Outputs of type {type(obj)} not supported."
-            raise TypeError(msg)
-
-        context.add_output_metadata({"path": self.get_output_path(path)})
+        """Write text asset to a file."""
+        self.super().handle_output(context, asset)
 
     def load_input(
         self: Self,
         context: InputContext,
     ) -> str:
-        """Load a file asset as a string."""
-        path = self._get_path(context)
-        return self.read_from_file(path)
+        """Load a text asset as a string."""
+        self.super().load_input(context)
 
-    def _get_path(
-        self: Self,
-        context: InputContext | OutputContext,
-    ) -> str:
-        key = f"{context.asset_key.path[-1]}.{self.filetype}"
-        if self._base_path:
-            return f"{self._base_path}/{key}"
-        return key
+    def _add_metadata(self, context: OutputContext, asset: str, path: str) -> None:  # noqa: ARG002
+        context.add_output_metadata({"path": path})
 
-    def get_output_path(self: Self, path: str) -> str:
-        """Return the path to the output file."""
-        return path
+    @property
+    def _extension(self: Self) -> str:
+        return f".{self.filetype}"
 
 
 class LocalTextFileIOManager(TextFileIOManager):
@@ -74,15 +58,15 @@ class LocalTextFileIOManager(TextFileIOManager):
     def _base_path(self: Self) -> str:
         return self.directory
 
-    def write_to_file(self: Self, text: str, path: str) -> None:
+    def _write(self: Self, asset: str, path: str) -> None:
         """Write a string to a file."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
 
         with Path.open(path, "w") as f:
-            f.write(text)
+            f.write(asset)
 
-    def read_from_file(self: Self, path: str) -> str:
+    def _read(self: Self, path: str) -> str:
         """Read a file as a string."""
         with Path.open(path) as f:
             return f.read()
@@ -95,17 +79,13 @@ class S3TextFileIOManager(TextFileIOManager):
 
     @property
     def _base_path(self: Self) -> str:
-        return ""
+        return s3.get_bucketpath(self.bucket_name)
 
-    def write_to_file(self: Self, text: str, path: str) -> None:
+    def _write(self: Self, text: str, path: str) -> None:
         """Write a string as a text file to an S3 bucket."""
         s3.create_bucket(bucket_name=self.bucket_name)
-        s3.write_to_s3(bucket_name=self.bucket_name, key=path, body=text)
+        s3.write_to_s3(body=text, path=path)
 
-    def read_from_file(self: Self, path: str) -> str:
+    def _read(self: Self, path: str) -> str:
         """Read a file as a string from an S3 bucket."""
-        return s3.read_from_s3(self.bucket_name, path)
-
-    def get_output_path(self: Self, path: str) -> str:
-        """Return the path to the output file."""
-        return s3.get_filepath(self.bucket_name, path)
+        return s3.read_from_s3(path)
