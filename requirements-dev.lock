@@ -6,6 +6,8 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
+#   universal: false
 
 -e file:.
 aiohttp==3.9.3
@@ -21,12 +23,16 @@ attrs==23.2.0
     # via aiohttp
 boto3==1.34.74
     # via dagster-io-managers
+    # via moto
 botocore==1.34.74
     # via boto3
+    # via moto
     # via s3fs
     # via s3transfer
 certifi==2024.2.2
     # via requests
+cffi==1.16.0
+    # via cryptography
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
@@ -35,6 +41,8 @@ coloredlogs==14.0
     # via dagster
 croniter==2.0.3
     # via dagster
+cryptography==42.0.7
+    # via moto
 dagster==1.6.14
     # via dagster-io-managers
 dagster-pipes==1.6.14
@@ -69,8 +77,11 @@ humanfriendly==10.0
 idna==3.6
     # via requests
     # via yarl
+iniconfig==2.0.0
+    # via pytest
 jinja2==3.1.3
     # via dagster
+    # via moto
 jmespath==1.0.1
     # via boto3
     # via botocore
@@ -81,8 +92,10 @@ markdown-it-py==3.0.0
 markupsafe==2.1.5
     # via jinja2
     # via mako
+    # via werkzeug
 mdurl==0.1.2
     # via markdown-it-py
+moto==5.0.7
 multidict==6.0.5
     # via aiohttp
     # via yarl
@@ -96,29 +109,38 @@ packaging==24.0
     # via dagster
     # via datasets
     # via huggingface-hub
+    # via pytest
 pandas==2.2.1
     # via datasets
 pendulum==3.0.0
     # via dagster
+pluggy==1.5.0
+    # via pytest
 polars==0.20.17
     # via dagster-io-managers
 protobuf==4.25.3
     # via dagster
     # via grpcio-health-checking
+py-partiql-parser==0.5.5
+    # via moto
 pyarrow==15.0.2
     # via datasets
 pyarrow-hotfix==0.6
     # via datasets
+pycparser==2.22
+    # via cffi
 pydantic==2.6.4
     # via dagster
 pydantic-core==2.16.3
     # via pydantic
 pygments==2.17.2
     # via rich
+pytest==8.2.0
 python-dateutil==2.9.0.post0
     # via botocore
     # via croniter
     # via dagster
+    # via moto
     # via pandas
     # via pendulum
     # via time-machine
@@ -132,10 +154,16 @@ pyyaml==6.0.1
     # via dagster
     # via datasets
     # via huggingface-hub
+    # via moto
+    # via responses
 requests==2.31.0
     # via dagster
     # via datasets
     # via huggingface-hub
+    # via moto
+    # via responses
+responses==0.25.0
+    # via moto
 rich==13.7.1
     # via dagster
 s3fs==0.4.2
@@ -178,8 +206,13 @@ universal-pathlib==0.2.2
 urllib3==2.2.1
     # via botocore
     # via requests
+    # via responses
 watchdog==4.0.0
     # via dagster
+werkzeug==3.0.3
+    # via moto
+xmltodict==0.13.0
+    # via moto
 xxhash==3.4.1
     # via datasets
 yarl==1.9.4

@@ -15,7 +15,30 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = [
+    "pytest>=8.2.0",
+    "moto[s3]>=5.0.7",
+]
+
+[tool.ruff.lint]
+select = [
+    "ALL",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    # at least this three should be fine in tests:
+    "S101", # asserts allowed in tests...
+    "ANN001", # Fixtures don't need type annotations
+    "ANN201", # Tests don't need return type annotations
+    "ARG", # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT", # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    # The below are debateable
+    "PLR2004", # Magic value used in comparison, ...
+    "S311", # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "S105", # Hard-coded mock credentials are fine
+    "PT004", # pytest fixtures do not need to return anything
+]
 
 [tool.hatch.metadata]
 allow-direct-references = true
