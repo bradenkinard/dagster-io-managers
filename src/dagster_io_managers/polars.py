@@ -31,14 +31,14 @@ class PolarsIOManager(BaseIOManager, ABC):
         asset: pl.DataFrame,
     ) -> None:
         """Write a polars dataframe to a parquet file."""
-        self.super().handle_output(context, asset)
+        super().handle_output(context, asset)
 
     def load_input(
         self: Self,
         context: InputContext,
     ) -> pl.DataFrame:
         """Load a polars dataframe from a parquet file."""
-        self.super().load_input(context)
+        super().load_input(context)
 
     def _add_metadata(
         self,

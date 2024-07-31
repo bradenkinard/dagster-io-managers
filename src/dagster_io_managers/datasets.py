@@ -27,14 +27,14 @@ class DatasetIOManager(BaseIOManager, ABC):
         asset: DatasetDict,
     ) -> None:
         """Write a dataset asset to disk."""
-        self.super().handle_output(context, asset)
+        super().handle_output(context, asset)
 
     def load_input(
         self: Self,
         context: InputContext,
     ) -> DatasetDict:
         """Load a dataset asset from disk."""
-        self.super().load_input(context)
+        super().load_input(context)
 
     def _add_metadata(
         self: Self,

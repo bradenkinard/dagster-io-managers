@@ -32,14 +32,14 @@ class TextFileIOManager(BaseIOManager, ABC):
         asset: str,
     ) -> None:
         """Write text asset to a file."""
-        self.super().handle_output(context, asset)
+        super().handle_output(context, asset)
 
     def load_input(
         self: Self,
         context: InputContext,
     ) -> str:
         """Load a text asset as a string."""
-        self.super().load_input(context)
+        super().load_input(context)
 
     def _add_metadata(self, context: OutputContext, asset: str, path: str) -> None:  # noqa: ARG002
         context.add_output_metadata({"path": path})
